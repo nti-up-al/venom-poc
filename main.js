@@ -1,5 +1,6 @@
 const venom = require('venom-bot');
-const axios = require('axios/dist/node/axios.cjs'); // node
+const axios = require('axios'); // node
+const session = [];
 venom
 .create(
   //session
@@ -34,29 +35,32 @@ venom
   });
 
 async function start(client) {
-  client.onMessage((message) => {
-    if (message.body === 'agenda-estudante' && message.isGroupMsg === false) {
-      client
-        .then((result) => {
-          axios.get('http://localhost:8080/cremessage/'+response.from)
+  client.onMessage(async (message) => {
+    if (message.body === 'criar-sessao' && message.isGroupMsg === false) {
+          axios.get('http://localhost:3001/api/createsession/'+message.from.replace('@c.us',''))
           .then(function (response) {
-            session.push(response.from);
-            return result.from;
+            session.push(message.from);
+            client.sendText(message.from, 'sessao criada');  
           })
           .catch(function (error) {
             console.log(error);
-          });
-          
-        }).sendText((result.from, result.message)) = {
-            
-        }
-        .catch((erro) => {
-          console.error('Error when sending: ', erro); //return object error
-        });
-    }else if(checkSession(message.from) );
+          });        
+         
+    }else if(await checkSession(message.from) ){
+      const response = await axios.post('http://localhost:3001/api/', {message});
+      client.sendText(message.from,response.data.message)      
+    };
 
   });
-
- 
 }
 
+
+async function checkSession(from){
+    var retorno = false;
+    await session.forEach(element => {
+      if(element == from){
+        retorno = true;
+      }
+    });
+    return retorno
+}
